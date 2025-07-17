@@ -161,12 +161,11 @@ jobs:
         pip install requests
     
     - name: Start Sanad API (background)
+      env:
+        OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+        SANAD_METRICS_PASSWORD: test123
       run: |
         cd backend
-        # Set test environment variables
-        export OPENAI_API_KEY=${{ secrets.OPENAI_API_KEY }}
-        export SANAD_METRICS_PASSWORD=test123
-        
         # Start the API in background
         python -m uvicorn app.main:app --host 0.0.0.0 --port 8000 &
         
@@ -175,18 +174,13 @@ jobs:
         
         # Test if API is responding
         curl -f http://localhost:8000/healthz || exit 1
-      env:
-        OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
     
     - name: Run accuracy benchmark
-      run: |
-        # Set environment variables
-        export OPENAI_API_KEY=${{ secrets.OPENAI_API_KEY }}
-        
-        # Run benchmark
-        python scripts/run_benchmark.py
       env:
         OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+      run: |
+        # Run benchmark
+        python scripts/run_benchmark.py
     
     - name: Upload benchmark results
       uses: actions/upload-artifact@v3
