@@ -85,7 +85,7 @@ Track **current work, backlog, sub‑tasks, discoveries, and milestones** for th
 * `[ ]` **BE-08**: Build coordinator service
   └─ `[ ]` BE-08.1: Parallel agent execution
   └─ `[ ]` BE-08.2: Score weighting and aggregation
-  └─ `[ ]` BE-08.3: Enhancer integration
+  └─ `[x]` BE-08.3: Enhancer integration - Completed 17 Jul 2025
 
 * `[ ]` **BE-09**: Create FastAPI endpoints
   └─ `[ ]` BE-09.1: /baseline endpoint
@@ -169,6 +169,12 @@ Track **current work, backlog, sub‑tasks, discoveries, and milestones** for th
   └─ `[ ]` QA-06.2: Implement automated scorer script with expected CSV output
   └─ `[ ]` QA-06.3: Add benchmark validation to CI/CD pipeline
   └─ `[ ]` QA-06.4: Document reproducible accuracy claims methodology
+
+* `[ ]` **QA-07**: Load-test ResponseEnhancer with 500 RPS, record p95 duration
+  └─ `[ ]` QA-07.1: Create JMeter/K6 script with 2-min ramp, 500 RPS sustained load
+  └─ `[ ]` QA-07.2: Assert p95 enhancement latency < 250ms under load
+  └─ `[ ]` QA-07.3: Validate jittered retry logic prevents thundering herd
+  └─ `[ ]` QA-07.4: Record Prometheus metrics during load test for baseline
 
 * `[ ]` **DX-02**: Set up Prometheus and Grafana monitoring
 
