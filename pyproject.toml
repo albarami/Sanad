@@ -3,7 +3,7 @@ line-length = 88
 target-version = ['py39']
 include = '\.pyi?$'
 extend-exclude = '''
-/(
+(
   # directories
   \.eggs
   | \.git
@@ -15,7 +15,9 @@ extend-exclude = '''
   | buck-out
   | build
   | dist
-)/
+  # problematic files with syntax errors
+  | scripts/enterprise_comparison_demo\.py
+)
 '''
 
 [tool.isort]

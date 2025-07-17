@@ -7,17 +7,18 @@ latency requirement as defined in PLANNING.md Section 5 (Constraints).
 
 import json
 import random
-from locust import HttpUser, task, between
+
+from locust import HttpUser, between, task
 
 
 class SanadUser(HttpUser):
     """
     Simulates a user of the Sanad v2 verification system.
     """
-    
+
     # Wait time between requests (1-3 seconds)
     wait_time = between(1, 3)
-    
+
     def on_start(self):
         """Called when a user starts."""
         # Sample queries for load testing
@@ -41,9 +42,9 @@ class SanadUser(HttpUser):
             "What are the investment principles in Islamic finance?",
             "What is the difference between Murabaha and Musharaka?",
             "What are the challenges facing Islamic finance?",
-            "What is the global market size of Islamic finance?"
+            "What is the global market size of Islamic finance?",
         ]
-    
+
     @task(10)
     def verify_query(self):
         """
@@ -51,11 +52,9 @@ class SanadUser(HttpUser):
         This task has weight 10 (most common operation).
         """
         query = random.choice(self.queries)
-        
+
         with self.client.post(
-            "/verify",
-            json={"query": query},
-            catch_response=True
+            "/verify", json={"query": query}, catch_response=True
         ) as response:
             if response.status_code == 200:
                 try:
@@ -69,7 +68,7 @@ class SanadUser(HttpUser):
                     response.failure("Invalid JSON response")
             else:
                 response.failure(f"HTTP {response.status_code}")
-    
+
     @task(2)
     def health_check(self):
         """
@@ -81,7 +80,7 @@ class SanadUser(HttpUser):
                 response.success()
             else:
                 response.failure(f"Health check failed: HTTP {response.status_code}")
-    
+
     @task(1)
     def metrics_check(self):
         """
@@ -93,7 +92,7 @@ class SanadUser(HttpUser):
         with self.client.get(
             "/metrics",
             auth=("metrics", "test123"),  # Default test credentials
-            catch_response=True
+            catch_response=True,
         ) as response:
             if response.status_code == 200:
                 if "sanad_enhancement_attempts_total" in response.text:
@@ -112,28 +111,26 @@ class SanadStressUser(HttpUser):
     Stress testing user - sends requests more aggressively.
     Use this class for stress testing scenarios.
     """
-    
+
     wait_time = between(0.1, 0.5)  # Much shorter wait times
-    
+
     def on_start(self):
         """Called when a user starts."""
         self.queries = [
             "Quick test query 1",
-            "Quick test query 2", 
+            "Quick test query 2",
             "Quick test query 3",
             "Quick test query 4",
-            "Quick test query 5"
+            "Quick test query 5",
         ]
-    
+
     @task
     def rapid_verify(self):
         """Rapid verification requests for stress testing."""
         query = random.choice(self.queries)
-        
+
         with self.client.post(
-            "/verify",
-            json={"query": query},
-            catch_response=True
+            "/verify", json={"query": query}, catch_response=True
         ) as response:
             if response.status_code == 200:
                 response.success()

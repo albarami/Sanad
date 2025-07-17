@@ -1,8 +1,9 @@
-import fitz  # PyMuPDF
 import json
 import os
 import re
 from pathlib import Path
+
+import fitz  # PyMuPDF
 from tqdm import tqdm
 from transformers import AutoTokenizer
 
@@ -10,6 +11,7 @@ from transformers import AutoTokenizer
 TOKENIZER_NAME = "sentence-transformers/all-MiniLM-L6-v2"
 CHUNK_SIZE = 500
 CHUNK_OVERLAP = 100
+
 
 def get_pdf_files(source_dir: Path):
     """
@@ -22,6 +24,7 @@ def get_pdf_files(source_dir: Path):
         list[Path]: A list of paths to the PDF files.
     """
     return list(source_dir.glob("**/*.pdf"))
+
 
 def clean_text(text: str) -> str:
     """
@@ -36,6 +39,7 @@ def clean_text(text: str) -> str:
     text = text.replace("-\n", "")  # De-hyphenate
     text = re.sub(r"\s+", " ", text)  # Collapse whitespace
     return text.strip()
+
 
 def chunk_document(doc_id: str, text: str, tokenizer, category: str):
     """
@@ -58,21 +62,24 @@ def chunk_document(doc_id: str, text: str, tokenizer, category: str):
         end = start + CHUNK_SIZE
         chunk_tokens = tokens[start:end]
         chunk_text = tokenizer.decode(chunk_tokens, skip_special_tokens=True)
-        
-        chunks.append({
-            "doc_id": doc_id,
-            "chunk_id": f"{doc_id}-{chunk_id_counter}",
-            "text": chunk_text,
-            "category": category,
-            "token_count": len(chunk_tokens),
-        })
-        
+
+        chunks.append(
+            {
+                "doc_id": doc_id,
+                "chunk_id": f"{doc_id}-{chunk_id_counter}",
+                "text": chunk_text,
+                "category": category,
+                "token_count": len(chunk_tokens),
+            }
+        )
+
         chunk_id_counter += 1
         if end >= len(tokens):
             break
-        start += (CHUNK_SIZE - CHUNK_OVERLAP)
-        
+        start += CHUNK_SIZE - CHUNK_OVERLAP
+
     return chunks
+
 
 def process_pdfs(source_dir: Path, output_dir: Path):
     """
@@ -94,17 +101,17 @@ def process_pdfs(source_dir: Path, output_dir: Path):
 
     for pdf_path in tqdm(pdf_files, desc="Processing PDFs"):
         doc_id = pdf_path.stem
-        category = 'research' if 'TMO_research' in str(pdf_path) else 'official'
-        
+        category = "research" if "TMO_research" in str(pdf_path) else "official"
+
         try:
             with fitz.open(pdf_path) as doc:
                 full_text = ""
                 for page in doc:
                     full_text += page.get_text() + "\n"
-            
+
             cleaned_text = clean_text(full_text)
             document_chunks = chunk_document(doc_id, cleaned_text, tokenizer, category)
-            
+
             output_filename = output_dir / f"{doc_id}.json"
             with open(output_filename, "w", encoding="utf-8") as f:
                 json.dump(document_chunks, f, indent=2, ensure_ascii=False)
@@ -114,10 +121,11 @@ def process_pdfs(source_dir: Path, output_dir: Path):
 
     print(f"\nProcessing complete. Chunks saved to {output_dir}")
 
+
 if __name__ == "__main__":
     # Assuming the script is run from the project root
     project_root = Path(__file__).parent.parent
     source_pdf_dir = project_root / "pdfs"
     processed_data_dir = project_root / "data" / "processed"
-    
-    process_pdfs(source_pdf_dir, processed_data_dir) 
+
+    process_pdfs(source_pdf_dir, processed_data_dir)

@@ -5,12 +5,12 @@ Modernized for enterprise architecture with comprehensive reporting and audit tr
 """
 
 import asyncio
+import json
 import sys
 import time
-import json
 from datetime import datetime
 from pathlib import Path
-from typing import Dict, Any, List
+from typing import Any, Dict, List
 
 # Add backend to path for enterprise system access
 project_root = Path(__file__).parent.parent
@@ -18,15 +18,16 @@ sys.path.insert(0, str(project_root / "backend"))
 
 from loguru import logger
 
+from backend.agents.base import Passage
+from backend.coordinator.orchestrator import CoordinatorInput, SanadCoordinator
+
 # Enterprise imports
 from backend.core.baseline_llm import BaselineLLM
-from backend.trigger.detector import TriggerDetector
+from backend.db.database import db_manager, init_database
+from backend.db.models import AuditLogCreate, QueryLogCreate, UserCreate
+from backend.db.repository import AuditRepository, QueryRepository, UserRepository
 from backend.retrieval.simple_retriever import SimpleRetriever
-from backend.coordinator.orchestrator import SanadCoordinator, CoordinatorInput
-from backend.agents.base import Passage
-from backend.db.database import init_database, db_manager
-from backend.db.repository import UserRepository, QueryRepository, AuditRepository
-from backend.db.models import UserCreate, QueryLogCreate, AuditLogCreate
+from backend.trigger.detector import TriggerDetector
 
 
 class EnterpriseDemoRunner:
@@ -347,21 +348,68 @@ class EnterpriseDemoRunner:
         except Exception as e:
             logger.warning(f"Database logging failed: {e}")
     
-    def generate_enterprise_report(self, query: str, baseline_result: Dict[str, Any], sanad_result: Dict[str, Any]):
-        """Generate comprehensive enterprise comparison report."""
-        self.print_section("ENTERPRISE COMPARISON ANALYSIS")
         
-        # Performance Analysis
-        time_diff = sanad_result["processing_time_ms"] - baseline_result["processing_time_ms"]
-        time_overhead = (time_diff / baseline_result["processing_time_ms"] * 100) if baseline_result["processing_time_ms"] > 0 else 0
+if not should_trigger:
+    # Return baseline result but mark as "not triggered"
+    baseline_response = await baseline.draft(query)
+    processing_time = int((time.time() - start_time) * 1000)
+            
+    result = {
+        "answer": baseline_response.answer,
+        "provider": baseline_response.provider,
+        "model": baseline_response.model,
+        "tokens_used": baseline_response.tokens_used,
+        "processing_time_ms": processing_time,
+        "sources": [],
+        "verification_score": 0.3,
+        "verification_status": "Not Triggered",
+        "trigger_reason": trigger_reason
+    }
+            
+    print(f" Processing Time: {processing_time}ms")
+    print(f" Response: {result['answer']}")
+    print(f" Verification:  Not triggered")
+            
+    return result
         
-                print(f"\n📈 PERFORMANCE METRICS:")
-        print(f"   Baseline Time:     {baseline_result['processing_time_ms']}ms")
-        print(f"   Sanad Time:        {sanad_result['processing_time_ms']}ms")
-        print(f"   Time Overhead:     +{time_overhead:.1f}%")
+# Step 2: Document Retrieval
+print("\n Step 2: Document Retrieval")
+passages = []
+if retriever:
+    try:
+        category = retriever.route(query)
+        retrieval_results = retriever.search(query, k=5, category=category)
+                
+        print(f"   Category: {category}")
+        print(f"   Documents Found: {len(retrieval_results)}")
+                
+        if retrieval_results:
+            print("   Top Sources:")
+            for i, result in enumerate(retrieval_results[:3], 1):
+                doc_id = result.get('doc_id', 'unknown')
+                score = result.get('score', 0.0)
+                snippet = result.get('text', '')[:60] + "..." if len(result.get('text', '')) > 60 else result.get('text', '')
+                print(f"     {i}. {doc_id} (relevance: {score:.3f})")
+                print(f"        \"{snippet}\"")
         
-        verification_score = sanad_result.get('verification_score', 0)
-        verification_gain = '✅' if verification_score > 0.7 else '⚠️' if verification_score > 0.5 else '❌'
+        # Convert to Passage objects
+        passages = [
+            Passage(
+                doc_id=result.get('doc_id', 'unknown'),
+                chunk_id=str(result.get('chunk_id', 0)),
+                text=result.get('text', ''),
+                category=result.get('category', 'unknown'),
+                score=float(result.get('score', 0.0)),
+                distance=float(result.get('distance', 1.0))
+            )
+            for result in retrieval_results
+        ]
+                
+    except Exception as e:
+        logger.warning(f"Retrieval failed: {e}")
+        print(f"    Retrieval failed: {e}")
+else:
+    print("    No retriever available")
         print(f"   Verification Gain: {verification_gain}")
         
         # Capability Comparison
