@@ -48,6 +48,64 @@ graph TB
     P --> Q[User Response]
 ```
 
+## 🧪 Testing & Quality Assurance
+
+### Automated Testing Framework
+
+**Unit Tests**
+```bash
+cd backend
+python -m pytest tests/ -v --cov=. --cov-report=term-missing
+# Target: ≥80% code coverage
+```
+
+**Accuracy Benchmark**
+```bash
+python scripts/run_benchmark.py
+# Tests against 20-question dataset
+# Target: ≥85% legal-hit rate
+# Validates latency: p95 ≤1000ms
+```
+
+**Load Testing**
+```bash
+# Basic load test (3 QPS as per PLANNING.md)
+locust -f ops/locust/locustfile.py --host=http://localhost:8000 -u 3 -r 1 -t 60s
+
+# Stress test
+locust -f ops/locust/locustfile.py --host=http://localhost:8000 -u 50 -r 5 -t 300s
+```
+
+**Configuration Validation**
+```bash
+# Validate all YAML configs
+python -c "import yaml; from pathlib import Path; [yaml.safe_load(open(f)) for f in Path('config').rglob('*.yaml')]"
+
+# Check for config changes (CI guard)
+./scripts/check_config_changes.sh
+```
+
+### CI/CD Pipeline
+
+The GitHub Actions workflow (`.github/workflows/ci.yml`) provides:
+
+- **Linting**: Black, isort, flake8 for code quality
+- **Testing**: Pytest with coverage reporting
+- **Benchmarking**: Automated accuracy validation
+- **Security**: Trivy vulnerability scanning
+- **Build**: Docker image validation
+- **Quality Gates**: All PLANNING.md Section 8 requirements
+
+### Quality Gates
+
+| Gate | Requirement | Implementation |
+|------|-------------|----------------|
+| Unit Coverage | ≥80% lines | pytest-cov |
+| Accuracy | ≥85% legal-hit rate | benchmark script |
+| Latency | p95 ≤1000ms | load testing |
+| Security | 0 critical CVEs | Trivy scanner |
+| Linting | No errors | flake8/ESLint |
+
 ## 🚀 Quick Start
 
 ### Prerequisites

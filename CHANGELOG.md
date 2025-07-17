@@ -1,5 +1,28 @@
 # Changelog
 
+## [v2.0.0-alpha.2] - 2025-07-18
+
+### ✨ Foundational Systems Implementation
+
+- **FAISS Retrieval System**: Implemented production-ready semantic search with `backend/retrieval/faiss_retriever.py` supporting vector similarity search, category filtering, and metadata management.
+- **Data Processing Pipeline**: Created `scripts/process_data.py` for automated document ingestion, chunking, embedding generation, and FAISS index building.
+- **Comprehensive Benchmark Framework**: Added `scripts/run_benchmark.py` with accuracy testing against 20-question dataset targeting ≥85% legal-hit rate as per PLANNING.md requirements.
+- **Load Testing Infrastructure**: Implemented `ops/locust/locustfile.py` for API performance validation with p95 ≤1000ms latency targets.
+- **Production CI/CD Pipeline**: Created `.github/workflows/ci.yml` with automated linting, testing, benchmarking, security scanning, and Docker builds.
+- **Quality Gate Enforcement**: All components now validate against PLANNING.md Section 8 quality requirements (80% test coverage, 85% accuracy, 1000ms latency).
+
+### 🏗️ Architecture Completion
+
+- **Sections 1-10 of PLANNING.md**: All foundational requirements systematically implemented and validated.
+- **End-to-End System**: Complete architecture from React frontend through FastAPI to FAISS retrieval with full observability.
+- **Production Readiness**: Comprehensive testing, monitoring, and deployment automation in place.
+
+### 📚 Dependencies & Infrastructure
+
+- **Updated Requirements**: Added faiss-cpu, locust, and supporting libraries to `backend/requirements.txt`.
+- **Benchmark Dataset**: Created `data/benchmarks/accuracy_benchmark.csv` with domain-specific test cases.
+- **CI/CD Integration**: GitHub Actions workflow with quality gates and automated validation.
+
 ## [v2.0.0-alpha.1] - 2025-07-18
 
 ### ✨ Features
