@@ -1,0 +1,47 @@
+# Sanad v2 Configuration File
+# This file contains default configuration values for the application
+
+# API Keys (will be loaded from environment variables)
+openai_api_key: ${OPENAI_API_KEY}
+anthropic_api_key: ${ANTHROPIC_API_KEY}
+
+# LLM Configuration
+llm:
+  primary_provider: "openai"
+  fallback_provider: "anthropic"
+  
+  openai:
+    model: "gpt-4o-mini"
+    temperature: 0.3
+    max_tokens: 150
+    timeout: 3.0
+    
+  anthropic:
+    model: "claude-3-haiku-20240307"
+    temperature: 0.3
+    max_tokens: 150
+    timeout: 3.0
+
+# Agent Weights
+agent_weights:
+  integrity: 0.4
+  precision: 0.3
+  provenance: 0.2
+  domain: 0.1
+
+# Thresholds
+thresholds:
+  trigger_similarity: 0.72
+  enhancement_threshold: 0.70
+  high_confidence: 0.85
+
+# Retrieval Configuration
+retrieval:
+  top_k: 5
+  chunk_size: 500
+  chunk_overlap: 100
+
+# Performance Targets
+performance:
+  max_latency_ms: 1000
+  target_retrieval_ms: 10 
