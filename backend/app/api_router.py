@@ -33,6 +33,7 @@ try:
     from ..db.models import (
         AuditLogCreate,
         FeedbackCreate,
+        QueryLogCreate,
         QueryLogResponse,
         User,
         UserCreate,
