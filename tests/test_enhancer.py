@@ -100,6 +100,8 @@ class TestResponseEnhancer:
         """Mock configuration for testing."""
         mock_config = Mock()
         mock_config.thresholds.enhancement_threshold = 0.70
+        mock_config.thresholds.max_retries = 2
+        mock_config.thresholds.base_delay = 1.0
         mock_config.llm.openai.timeout = 3.0
         mock_config.llm.openai.max_tokens = 250
         mock_config.llm.primary_provider = "openai"
@@ -321,6 +323,8 @@ class TestEnhancementIntegration:
         
         mock_config = Mock()
         mock_config.thresholds.enhancement_threshold = 0.70
+        mock_config.thresholds.max_retries = 2
+        mock_config.thresholds.base_delay = 1.0
         mock_config.llm.openai.timeout = 3.0
         mock_config.llm.openai.max_tokens = 250
         mock_config.llm.primary_provider = "openai"

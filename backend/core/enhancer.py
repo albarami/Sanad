@@ -10,6 +10,16 @@ import time
 from typing import Dict, List, Optional, Pattern
 from loguru import logger
 
+# Optional Prometheus metrics (graceful degradation if not available)
+try:
+    from prometheus_client import Counter, Histogram
+    ENHANCEMENT_ATTEMPTS = Counter('sanad_enhancement_attempts_total', 'Total enhancement attempts', ['status'])
+    ENHANCEMENT_DURATION = Histogram('sanad_enhancement_duration_seconds', 'Enhancement processing time')
+    METRICS_AVAILABLE = True
+except ImportError:
+    METRICS_AVAILABLE = False
+    logger.warning("Prometheus metrics not available - install prometheus_client for production monitoring")
+
 from core.config import get_config, Config
 from agents.base import AgentScore, Passage
 from core.baseline_llm import BaselineLLM
@@ -90,17 +100,23 @@ class ResponseEnhancer:
         Enhance the draft answer if needed based on Sanad score and agent feedback.
         
         Args:
-            request: Enhancement request with question, draft answer, and context
+            request: Enhancement request with context
             
         Returns:
-            EnhancementResponse with enhanced answer and metadata
+            Enhanced response with metadata
         """
         start_time = time.time()
+        
+        # Track enhancement attempts
+        if METRICS_AVAILABLE:
+            timer = ENHANCEMENT_DURATION.time()
         
         try:
             # Check if enhancement is needed
             if not self._should_enhance(request):
                 logger.info(f"Enhancement not needed - Sanad score {request.sanad_score:.3f} >= threshold {self.enhancement_threshold}")
+                if METRICS_AVAILABLE:
+                    ENHANCEMENT_ATTEMPTS.labels(status="skipped").inc()
                 return EnhancementResponse(
                     enhanced_answer=request.draft_answer,
                     enhancement_applied=False,
@@ -119,6 +135,11 @@ class ResponseEnhancer:
             
             processing_time = int((time.time() - start_time) * 1000)
             
+            # Track successful enhancement
+            if METRICS_AVAILABLE:
+                status = "success" if enhancement_success else "failed"
+                ENHANCEMENT_ATTEMPTS.labels(status=status).inc()
+            
             return EnhancementResponse(
                 enhanced_answer=enhanced_answer,
                 enhancement_applied=enhancement_success,
@@ -132,6 +153,10 @@ class ResponseEnhancer:
             logger.error(f"Enhancement failed: {str(e)}")
             processing_time = int((time.time() - start_time) * 1000)
             
+            # Track exception
+            if METRICS_AVAILABLE:
+                ENHANCEMENT_ATTEMPTS.labels(status="error").inc()
+            
             return EnhancementResponse(
                 enhanced_answer=request.draft_answer,
                 enhancement_applied=False,
@@ -140,6 +165,10 @@ class ResponseEnhancer:
                 confidence=request.sanad_score,
                 sources_used=[]
             )
+        finally:
+            # Record timing
+            if METRICS_AVAILABLE:
+                timer.stop()
     
     def _should_enhance(self, request: EnhancementRequest) -> bool:
         """
@@ -199,8 +228,8 @@ class ResponseEnhancer:
         # Call LLM for enhancement with timeout and retry
         logger.info("Calling LLM for answer enhancement")
         
-        max_retries = 2
-        base_delay = 1.0
+        max_retries = self.config.thresholds.max_retries
+        base_delay = self.config.thresholds.base_delay
         
         for attempt in range(max_retries):
             try:

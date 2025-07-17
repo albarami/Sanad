@@ -41,6 +41,9 @@ class Thresholds(BaseModel):
     trigger_similarity: float = 0.72
     enhancement_threshold: float = 0.70
     high_confidence: float = 0.85
+    # Retry configuration for LLM calls
+    max_retries: int = 2
+    base_delay: float = 1.0
 
 
 class RetrievalConfig(BaseModel):
