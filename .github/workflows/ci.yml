@@ -27,7 +27,7 @@ jobs:
       run: |
         cd backend
         pip install -r requirements.txt
-        pip install flake8 black isort
+        pip install flake8==7.0.0 black==25.1.0 isort==6.0.1
     
     - name: Run Black (Python formatter)
       run: |
