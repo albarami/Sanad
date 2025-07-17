@@ -18,6 +18,7 @@ sys.path.insert(0, str(backend_path.parent))
 
 from backend.agents.base import Passage
 from backend.coordinator.orchestrator import CoordinatorInput, SanadCoordinator
+
 # Now import with proper path resolution
 from backend.core.baseline_llm import BaselineLLM
 from backend.retrieval.simple_retriever import SimpleRetriever
