@@ -176,11 +176,31 @@ Track **current work, backlog, sub‑tasks, discoveries, and milestones** for th
   └─ `[ ]` QA-07.3: Validate jittered retry logic prevents thundering herd
   └─ `[ ]` QA-07.4: Record Prometheus metrics during load test for baseline
 
+* `[x]` **BE-19**: Prometheus /metrics FastAPI wiring (sub-tasks: expose /metrics, gate with basic-auth, register sanad_enhancement_* metrics, GET /healthz)
+  - **Note**: Also fixed import path errors, Prometheus duplicate metric registration on reload, and a database shutdown warning.
+  └─ `[x]` BE-19.1: Add prometheus_client's make_asgi_app() to backend/main.py
+  └─ `[x]` BE-19.2: Gate /metrics route with basic-auth (username=metrics, SANAD_METRICS_PASSWORD)
+  └─ `[x]` BE-19.3: Register sanad_enhancement_* counters/histogram from enhancer
+  └─ `[x]` BE-19.4: Add GET /healthz endpoint for k8s/Nginx probes
+  └─ `[ ]` BE-19.5: Verify metrics with curl -u metrics:pw http://localhost:8000/metrics
+
+* `[x]` **BE-20**: Grafana dashboards import via Helm values
+  └─ `[x]` BE-20.1: Create `ops/grafana/dashboards/sanad_enhancement_metrics.json`
+  └─ `[x]` BE-20.2: Create 3 panels: Enhancement Success Rate, Enhancement p95 Latency, RPS vs Error %
+  └─ `[x]` BE-20.3: Reference dashboard in `ops/grafana/values.yaml` for auto-import
+
+* `[x]` **BE-21**: Config immutability hash + CI guard
+  └─ `[x]` BE-21.1: Create `backend/core/config_hash.py` to compute SHA-256 of `config/`
+  └─ `[x]` BE-21.2: Export hash as Prometheus gauge: `sanad_config_hash{hash="..."} = 1`
+  └─ `[x]` BE-21.3: Integrate hash computation into FastAPI startup lifecycle
+  └─ `[x]` BE-21.4: Create `scripts/check_config_changes.sh` to guard against unlogged config changes
+
 * `[ ]` **DX-02**: Set up Prometheus and Grafana monitoring
 
 * `[ ]` **DX-03**: Enterprise CI/CD Security Integration
   └─ `[ ]` DX-03.1: Add pip-licenses + npm-license-checker to CI pipeline
-  └─ `[ ]` DX-03.2: Implement OSS license whitelist enforcement (MIT/BSD/Apache)
+  └─ `[ ]` DX-03.2: Implement automated SPDX manifest generation
+  └─ `[ ]` DX-03.3: Add automated OSS license whitelist enforcement (MIT/BSD/Apache)
   └─ `[ ]` DX-03.3: Add automated SPDX manifest generation
   └─ `[ ]` DX-03.4: Create Prometheus rule file deployment automation
 
@@ -208,6 +228,11 @@ Track **current work, backlog, sub‑tasks, discoveries, and milestones** for th
 * `[ ]` **BE-10**: Add caching layer for repeated queries
 * `[ ]` **DX-02**: Set up Prometheus and Grafana monitoring
 * `[ ]` **BE-11**: Implement audit trail and logging
+* `[ ]` **DX-04**: Swap character-based truncation for tiktoken token-budgeting
+  └─ `[ ]` DX-04.1: Replace 512-character limit with token-based truncation using tiktoken
+  └─ `[ ]` DX-04.2: Support multiple LLM models (GPT-4o-mini, Claude, etc.) with different token limits
+  └─ `[ ]` DX-04.3: Add token budget configuration to domain YAML files
+  └─ `[ ]` DX-04.4: Update tests to validate token-based truncation accuracy
 
 ## 7  Done (chronological)
 

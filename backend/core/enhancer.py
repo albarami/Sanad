@@ -12,17 +12,25 @@ from loguru import logger
 
 # Optional Prometheus metrics (graceful degradation if not available)
 try:
-    from prometheus_client import Counter, Histogram
-    ENHANCEMENT_ATTEMPTS = Counter('sanad_enhancement_attempts_total', 'Total enhancement attempts', ['status'])
-    ENHANCEMENT_DURATION = Histogram('sanad_enhancement_duration_seconds', 'Enhancement processing time')
+    from prometheus_client import Counter, Histogram, REGISTRY
+    
+    # Check if metrics already exist to avoid duplicate registration
+    def get_or_create_metric(metric_class, name, *args, **kwargs):
+        for collector in REGISTRY._collector_to_names:
+            if hasattr(collector, '_name') and collector._name == name:
+                return collector
+        return metric_class(name, *args, **kwargs)
+    
+    ENHANCEMENT_ATTEMPTS = get_or_create_metric(Counter, 'sanad_enhancement_attempts_total', 'Total enhancement attempts', ['status'])
+    ENHANCEMENT_DURATION = get_or_create_metric(Histogram, 'sanad_enhancement_duration_seconds', 'Enhancement processing time')
     METRICS_AVAILABLE = True
 except ImportError:
     METRICS_AVAILABLE = False
     logger.warning("Prometheus metrics not available - install prometheus_client for production monitoring")
 
-from core.config import get_config, Config
-from agents.base import AgentScore, Passage
-from core.baseline_llm import BaselineLLM
+from ..core.config import get_config, Config
+from ..agents.base import AgentScore, Passage
+from ..core.baseline_llm import BaselineLLM
 from pydantic import BaseModel, Field
 from typing import Any
 

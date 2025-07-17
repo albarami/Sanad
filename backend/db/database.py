@@ -193,12 +193,12 @@ class DatabaseManager:
             logger.error(f"Database health check failed: {str(e)}")
             return False
     
-    def close(self) -> None:
-        """Close database connections."""
+    async def close(self) -> None:
+        """Close database connections asynchronously."""
         if self.engine:
             self.engine.dispose()
         if self.async_engine:
-            self.async_engine.dispose()
+            await self.async_engine.dispose()
         
         self._initialized = False
         logger.info("Database connections closed")

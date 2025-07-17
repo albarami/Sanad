@@ -1,0 +1,98 @@
+# Grafana Helm Chart Values for Sanad v2
+# Auto-imports dashboards and configures data sources
+
+grafana:
+  # Dashboard provisioning
+  dashboardProviders:
+    dashboardproviders.yaml:
+      apiVersion: 1
+      providers:
+      - name: 'default'
+        orgId: 1
+        folder: 'Sanad v2'
+        type: file
+        disableDeletion: false
+        updateIntervalSeconds: 10
+        allowUiUpdates: true
+        options:
+          path: /var/lib/grafana/dashboards/default
+
+  # Dashboard imports
+  dashboards:
+    default:
+      sanad-enhancement-metrics:
+        file: dashboards/sanad_enhancement_metrics.json
+        datasource: prometheus
+
+  # Data source configuration
+  datasources:
+    datasources.yaml:
+      apiVersion: 1
+      datasources:
+      - name: Prometheus
+        type: prometheus
+        url: http://prometheus-server:80
+        access: proxy
+        isDefault: true
+        editable: true
+
+  # Grafana configuration
+  grafana.ini:
+    server:
+      root_url: "%(protocol)s://%(domain)s:%(http_port)s/grafana/"
+      serve_from_sub_path: true
+    security:
+      admin_user: admin
+      admin_password: "${GRAFANA_ADMIN_PASSWORD}"
+    auth.anonymous:
+      enabled: false
+    users:
+      allow_sign_up: false
+      auto_assign_org: true
+      auto_assign_org_role: Viewer
+
+  # Resource limits
+  resources:
+    limits:
+      cpu: 500m
+      memory: 512Mi
+    requests:
+      cpu: 100m
+      memory: 128Mi
+
+  # Persistence
+  persistence:
+    enabled: true
+    size: 10Gi
+    storageClassName: standard
+
+  # Service configuration
+  service:
+    type: ClusterIP
+    port: 80
+
+  # Ingress configuration (if needed)
+  ingress:
+    enabled: false
+    annotations: {}
+    hosts: []
+    tls: []
+
+# Prometheus configuration (if deploying together)
+prometheus:
+  server:
+    global:
+      scrape_interval: 15s
+      evaluation_interval: 15s
+    
+    # Scrape configs for Sanad metrics
+    extraScrapeConfigs: |
+      - job_name: 'sanad-api'
+        static_configs:
+          - targets: ['sanad-api:8000']
+        metrics_path: '/metrics'
+        basic_auth:
+          username: 'metrics'
+          password: '${SANAD_METRICS_PASSWORD}'
+        scrape_interval: 5s
+        scrape_timeout: 3s

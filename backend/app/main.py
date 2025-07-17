@@ -4,17 +4,37 @@ Implements startup/shutdown lifecycle, database initialization, and health monit
 """
 
 import asyncio
+import os
+import secrets
 from contextlib import asynccontextmanager
-from fastapi import FastAPI, HTTPException
+from dotenv import load_dotenv
+
+# Load environment variables from .env file
+load_dotenv()
+from fastapi import FastAPI, HTTPException, Depends, status
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.middleware.trustedhost import TrustedHostMiddleware
+from fastapi.security import HTTPBasic, HTTPBasicCredentials
 from loguru import logger
 import uvicorn
+
+# Prometheus imports with graceful fallback
+try:
+    from prometheus_client import make_asgi_app, REGISTRY
+    PROMETHEUS_AVAILABLE = True
+except ImportError:
+    logger.warning("prometheus_client not available - metrics endpoint will be disabled")
+    PROMETHEUS_AVAILABLE = False
 
 # Import application components
 from .api_router import api_router
 from ..db.database import init_database, close_database, db_manager
 from ..core.config import get_config
+
+# Import enhancer to register Prometheus metrics
+if PROMETHEUS_AVAILABLE:
+    from ..core import enhancer  # This registers the sanad_enhancement_* metrics
+    from ..core.config_hash import compute_config_hash
 
 
 @asynccontextmanager
@@ -39,8 +59,15 @@ async def lifespan(app: FastAPI):
         
         logger.info("✅ Database initialized successfully")
         
+        # Compute config hash for immutability tracking
+        if PROMETHEUS_AVAILABLE:
+            try:
+                config_hash = compute_config_hash()
+                logger.info(f"📋 Config hash computed and exported to Prometheus")
+            except Exception as e:
+                logger.warning(f"Failed to compute config hash: {e}")
+        
         # Future: Initialize other enterprise services
-        # - Prometheus metrics
         # - Background tasks (data cleanup, backups)
         # - Rate limiting
         # - Authentication
@@ -54,20 +81,15 @@ async def lifespan(app: FastAPI):
         raise
     
     finally:
-        # Shutdown
+        # Clean up resources on shutdown
         logger.info("🔄 Shutting down Sanad v2 Enterprise System")
         
-        try:
-            # Close database connections
-            close_database()
+        # Close database connections
+        if db_manager._initialized:
+            await db_manager.close()
             logger.info("✅ Database connections closed")
-            
-            # Future: Cleanup other enterprise services
-            
-            logger.info("✅ Sanad v2 shutdown completed")
-            
-        except Exception as e:
-            logger.error(f"❌ Shutdown error: {str(e)}")
+        
+        logger.info("✅ Sanad v2 shutdown completed")
 
 
 def create_app() -> FastAPI:
@@ -108,11 +130,39 @@ def create_app() -> FastAPI:
     # Include API routes
     app.include_router(api_router, prefix="/api")
     
+    # Basic auth for metrics endpoint
+    security = HTTPBasic()
+    
+    def authenticate_metrics(credentials: HTTPBasicCredentials = Depends(security)):
+        """Authenticate metrics endpoint access."""
+        metrics_password = os.getenv("SANAD_METRICS_PASSWORD")
+        if not metrics_password:
+            raise HTTPException(
+                status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+                detail="Metrics authentication not configured"
+            )
+        
+        correct_username = secrets.compare_digest(credentials.username, "metrics")
+        correct_password = secrets.compare_digest(credentials.password, metrics_password)
+        
+        if not (correct_username and correct_password):
+            raise HTTPException(
+                status_code=status.HTTP_401_UNAUTHORIZED,
+                detail="Invalid metrics credentials",
+                headers={"WWW-Authenticate": "Basic"},
+            )
+        return credentials
+    
     # Add enterprise health check endpoints
     @app.get("/health")
     async def health_check():
         """Basic health check endpoint."""
         return {"status": "healthy", "version": "2.0.0"}
+    
+    @app.get("/healthz")
+    async def healthz():
+        """Kubernetes/Nginx health probe endpoint."""
+        return {"status": "ok"}
     
     @app.get("/health/detailed")
     async def detailed_health_check():
@@ -142,15 +192,37 @@ def create_app() -> FastAPI:
             logger.error(f"Health check failed: {str(e)}")
             raise HTTPException(status_code=503, detail=f"Service unhealthy: {str(e)}")
     
-    @app.get("/metrics")
-    async def metrics_endpoint():
-        """Prometheus metrics endpoint for monitoring."""
-        # Future: Implement Prometheus metrics collection
-        # For now, return basic metrics
-        return {
-            "status": "metrics_placeholder",
-            "message": "Prometheus metrics integration coming soon"
-        }
+    # Prometheus metrics endpoint with basic auth
+    if PROMETHEUS_AVAILABLE:
+        from prometheus_client import generate_latest, CONTENT_TYPE_LATEST
+        from fastapi import Response
+        
+        @app.get("/metrics")
+        async def metrics_endpoint(
+            _: HTTPBasicCredentials = Depends(authenticate_metrics)
+        ):
+            """Prometheus metrics endpoint with basic authentication."""
+            try:
+                # Generate Prometheus metrics in the expected format
+                metrics_data = generate_latest(REGISTRY)
+                return Response(
+                    content=metrics_data,
+                    media_type=CONTENT_TYPE_LATEST
+                )
+            except Exception as e:
+                logger.error(f"Failed to generate metrics: {str(e)}")
+                raise HTTPException(
+                    status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                    detail="Failed to generate metrics"
+                )
+    else:
+        @app.get("/metrics")
+        async def metrics_disabled():
+            """Disabled metrics endpoint when Prometheus not available."""
+            return {
+                "status": "disabled",
+                "message": "Prometheus client not installed - metrics unavailable"
+            }
     
     return app
 
