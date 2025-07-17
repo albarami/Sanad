@@ -1,0 +1,34 @@
+# Healthcare Domain Configuration
+# Example configuration for adapting the system to healthcare context
+
+domain:
+  name: "healthcare"
+  keywords:
+    - "medical"
+    - "health"
+    - "disease"
+    - "treatment"
+    - "diagnosis"
+    - "patient"
+    - "doctor"
+    - "physician"
+    - "hospital"
+    - "clinic"
+    - "medicine"
+    - "drug"
+    - "medication"
+    - "therapy"
+    - "surgery"
+    - "symptom"
+    - "condition"
+    - "healthcare"
+    - "clinical"
+    - "pharmaceutical"
+  enhancement_instructions: |
+    6. For medical topics, prioritize peer-reviewed research and clinical guidelines
+    7. Use appropriate medical terminology and ICD-10 codes where relevant
+    8. Acknowledge evidence levels and clinical recommendations
+    9. Distinguish between established treatments and experimental therapies
+    10. Include relevant contraindications and side effects
+  terminology_guidelines: "Use standard medical terminology and avoid colloquialisms"
+  source_requirements: "Prioritize peer-reviewed journals, clinical guidelines, and medical authorities"

@@ -137,6 +137,93 @@ python scripts/cli_verify.py "What are the conditions for valid wudu?"
 
 ## 🔧 Configuration
 
+### Domain-Agnostic Design
+
+Sanad v2 is designed to be **domain-agnostic** and can be easily adapted to different knowledge domains by simply changing configuration files - no code changes required!
+
+#### Switching Domains
+
+To switch to a different domain, update the `domain` section in `config/config.yaml` or use one of the pre-configured domain files:
+
+```bash
+# Use healthcare domain
+cp config/domains/healthcare.yaml config/config.yaml
+
+# Use finance domain  
+cp config/domains/finance.yaml config/config.yaml
+
+# Use labor market domain
+cp config/domains/labor_market.yaml config/config.yaml
+```
+
+#### Domain Configuration Structure
+
+```yaml
+domain:
+  name: "healthcare"  # Domain identifier
+  keywords:  # Keywords for domain relevance detection
+    - "medical"
+    - "health"
+    - "diagnosis"
+    - "treatment"
+    - "patient"
+  enhancement_instructions: |
+    6. For medical topics, prioritize peer-reviewed sources and clinical guidelines
+    7. Use appropriate medical terminology and cite relevant studies
+  terminology_guidelines: "Use standard medical terminology"
+  source_requirements: "Prefer peer-reviewed medical journals"
+```
+
+#### Available Domain Examples
+
+- **Islamic Knowledge** (`config/domains/islamic.yaml`): Default Islamic scholarly verification
+- **Healthcare** (`config/domains/healthcare.yaml`): Medical and clinical knowledge
+- **Finance** (`config/domains/finance.yaml`): Financial regulations and compliance
+- **Labor Market** (`config/domains/labor_market.yaml`): Employment and labor law
+- **General** (`config/domains/general.yaml`): General-purpose knowledge verification
+
+### Advanced Features
+
+#### Hot-Reload Configuration
+
+The system supports hot-reloading of configuration without restart:
+
+```python
+from core.enhancer import ResponseEnhancer
+
+# Initialize enhancer
+enhancer = ResponseEnhancer()
+
+# Reload configuration at runtime
+enhancer.reload_config()  # Reloads from file
+# or
+enhancer.reload_config(new_config)  # Use specific config
+```
+
+#### Production Resilience Features
+
+- **Jittered Retry Backoff**: LLM calls use exponential backoff with ±20% jitter to prevent thundering herd
+- **Config Caching**: Avoids per-call YAML parsing for better performance
+- **LLM Client Injection**: Constructor accepts optional LLM client for enhanced testability
+- **Token Budgeting**: Automatic passage truncation to prevent token limit issues
+- **Case-Insensitive Matching**: All agent and keyword comparisons are case-safe
+
+#### Environment Variables
+
+```bash
+# Override domain configuration
+SANAD_DOMAIN_CONFIG=./config/domains/healthcare.yaml
+
+# API Keys
+OPENAI_API_KEY=your_openai_key
+ANTHROPIC_API_KEY=your_anthropic_key
+
+# Database
+DATABASE_URL=postgresql://user:pass@localhost/sanad
+```
+
+### Core Configuration
+
 Key configuration options in `config/config.yaml`:
 
 ```yaml

@@ -50,6 +50,15 @@ class RetrievalConfig(BaseModel):
     chunk_overlap: int = 100
 
 
+class DomainConfig(BaseModel):
+    """Domain-specific configuration for different contexts."""
+    name: str = "general"
+    keywords: list[str] = []
+    enhancement_instructions: str = ""  # Default empty to prevent blank line issues
+    terminology_guidelines: str = ""
+    source_requirements: str = ""
+
+
 class PerformanceTargets(BaseModel):
     """Performance target metrics."""
     max_latency_ms: int = 1000
@@ -65,6 +74,7 @@ class Config(BaseModel):
     thresholds: Thresholds
     retrieval: RetrievalConfig
     performance: PerformanceTargets
+    domain: DomainConfig = Field(default_factory=DomainConfig)
     
     # Additional settings from environment
     environment: str = Field(default="development")

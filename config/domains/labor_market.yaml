@@ -1,0 +1,42 @@
+# Labor Market Domain Configuration
+# Example configuration for adapting the system to labor market context
+
+domain:
+  name: "labor_market"
+  keywords:
+    - "employment"
+    - "job"
+    - "career"
+    - "hiring"
+    - "recruitment"
+    - "resume"
+    - "interview"
+    - "salary"
+    - "wage"
+    - "benefits"
+    - "workplace"
+    - "labor"
+    - "union"
+    - "skills"
+    - "training"
+    - "education"
+    - "certification"
+    - "unemployment"
+    - "workforce"
+    - "hr"
+    - "human resources"
+    - "employee"
+    - "employer"
+    - "contractor"
+    - "freelance"
+    - "remote work"
+    - "gig economy"
+    - "professional development"
+  enhancement_instructions: |
+    6. For labor market topics, prioritize current employment data and industry trends
+    7. Use appropriate HR terminology and labor law references
+    8. Acknowledge regional variations in employment practices
+    9. Distinguish between general advice and specific legal requirements
+    10. Include relevant labor statistics and market conditions
+  terminology_guidelines: "Use standard HR and labor market terminology"
+  source_requirements: "Prioritize labor statistics, employment agencies, and HR professional bodies"

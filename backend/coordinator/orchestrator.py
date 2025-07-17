@@ -14,6 +14,7 @@ try:
     from ..agents.base import BaseAgent, AgentInput, AgentScore, Passage
     from ..core.config import get_config
     from ..core.baseline_llm import BaselineLLM, LLMResponse
+    from ..core.enhancer import ResponseEnhancer, EnhancementRequest
     from ..db.database import db_manager
     from ..db.repository import QueryRepository, AuditRepository
     from ..db.models import QueryLogCreate, AuditLogCreate
@@ -21,6 +22,7 @@ except ImportError:
     from agents.base import BaseAgent, AgentInput, AgentScore, Passage
     from core.config import get_config
     from core.baseline_llm import BaselineLLM, LLMResponse
+    from core.enhancer import ResponseEnhancer, EnhancementRequest
     from db.database import db_manager
     from db.repository import QueryRepository, AuditRepository
     from db.models import QueryLogCreate, AuditLogCreate
@@ -60,9 +62,9 @@ class SanadCoordinator:
         self.config = get_config()
         self.baseline_llm = BaselineLLM()
         self.agents: Dict[str, BaseAgent] = {}
-        self.enhancer = None  # Will be set when enhancer is implemented
+        self.enhancer = ResponseEnhancer()
         
-        logger.info("Initialized SanadCoordinator")
+        logger.info("Initialized SanadCoordinator with ResponseEnhancer")
     
     def register_agent(self, agent: BaseAgent) -> None:
         """
@@ -104,7 +106,7 @@ class SanadCoordinator:
             
             if sanad_score < enhancement_threshold:
                 logger.info(f"Score {sanad_score:.3f} below threshold {enhancement_threshold}, enhancing answer")
-                final_answer = await self._enhance_answer(input_data, agent_scores)
+                final_answer = await self._enhance_answer(input_data, agent_scores, sanad_score)
                 enhanced = True
             else:
                 logger.info(f"Score {sanad_score:.3f} above threshold, using draft answer")
@@ -261,84 +263,38 @@ class SanadCoordinator:
         logger.info(f"Computed Sanad score: {final_score:.3f} (from {len(agent_scores)} agents)")
         return min(max(final_score, 0.0), 1.0)  # Clamp to [0, 1]
     
-    async def _enhance_answer(self, input_data: CoordinatorInput, agent_scores: Dict[str, AgentScore]) -> str:
+    async def _enhance_answer(self, input_data: CoordinatorInput, agent_scores: Dict[str, AgentScore], sanad_score: float) -> str:
         """
-        Enhance the answer using LLM with retrieved passages.
+        Enhance the answer using the ResponseEnhancer module.
         
         Args:
             input_data: Original input data
             agent_scores: Scores from agents for context
+            sanad_score: Computed Sanad score
             
         Returns:
             Enhanced answer
         """
         try:
-            # Build enhancement prompt
-            enhancement_prompt = self._build_enhancement_prompt(
-                input_data.question,
-                input_data.draft_answer,
-                input_data.passages,
-                agent_scores
+            # Create enhancement request
+            enhancement_request = EnhancementRequest(
+                question=input_data.question,
+                draft_answer=input_data.draft_answer,
+                passages=input_data.passages,
+                agent_scores=agent_scores,
+                sanad_score=sanad_score,
+                metadata=input_data.metadata
             )
             
-            # Call LLM for enhancement
-            logger.info("Calling LLM for answer enhancement")
-            enhanced_response = await self.baseline_llm.draft(enhancement_prompt)
+            # Use the enhancer module
+            logger.info("Using ResponseEnhancer for answer enhancement")
+            enhancement_response = await self.enhancer.enhance(enhancement_request)
             
-            return enhanced_response.answer
+            return enhancement_response.enhanced_answer
             
         except Exception as e:
             logger.error(f"Enhancement failed: {str(e)}, using original answer")
             return input_data.draft_answer
-    
-    def _build_enhancement_prompt(self, question: str, draft_answer: str, passages: List[Passage], agent_scores: Dict[str, AgentScore]) -> str:
-        """
-        Build the enhancement prompt for the LLM.
-        
-        Args:
-            question: Original question
-            draft_answer: Original draft answer
-            passages: Retrieved passages
-            agent_scores: Agent evaluation scores
-            
-        Returns:
-            Enhancement prompt string
-        """
-        # Build passages context
-        passages_text = "\n\n".join([
-            f"Passage {i+1} (from {p.doc_id}):\n{p.text}"
-            for i, p in enumerate(passages[:5])  # Top 5 passages
-        ])
-        
-        # Build agent feedback
-        agent_feedback = "\n".join([
-            f"- {score.agent_name}: {score.explanation}"
-            for score in agent_scores.values()
-            if score.explanation
-        ])
-        
-        prompt = f"""Using only the provided passages below, improve this answer to be more accurate and complete.
-
-QUESTION: {question}
-
-ORIGINAL ANSWER: {draft_answer}
-
-AVAILABLE PASSAGES:
-{passages_text}
-
-AGENT FEEDBACK:
-{agent_feedback}
-
-INSTRUCTIONS:
-1. Use only information from the provided passages
-2. Be more precise and accurate than the original answer
-3. Include specific citations where appropriate
-4. Limit response to 250 tokens maximum
-5. If passages don't support the answer, say so clearly
-
-IMPROVED ANSWER:"""
-
-        return prompt
     
     async def _log_verification(
         self,

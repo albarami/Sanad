@@ -1,0 +1,42 @@
+# Finance Domain Configuration
+# Example configuration for adapting the system to finance context
+
+domain:
+  name: "finance"
+  keywords:
+    - "finance"
+    - "financial"
+    - "investment"
+    - "banking"
+    - "market"
+    - "stock"
+    - "bond"
+    - "portfolio"
+    - "trading"
+    - "currency"
+    - "forex"
+    - "cryptocurrency"
+    - "bitcoin"
+    - "ethereum"
+    - "loan"
+    - "mortgage"
+    - "credit"
+    - "debt"
+    - "insurance"
+    - "retirement"
+    - "pension"
+    - "tax"
+    - "accounting"
+    - "audit"
+    - "compliance"
+    - "regulation"
+    - "SEC"
+    - "FDIC"
+  enhancement_instructions: |
+    6. For financial topics, prioritize regulatory compliance and current market data
+    7. Use appropriate financial terminology and industry standards
+    8. Acknowledge market risks and regulatory requirements
+    9. Distinguish between investment advice and educational information
+    10. Include relevant disclaimers about financial risks
+  terminology_guidelines: "Use standard financial terminology and regulatory language"
+  source_requirements: "Prioritize regulatory bodies, financial institutions, and market data providers"

@@ -1,0 +1,9 @@
+# General Domain Configuration
+# Example configuration for general-purpose usage without domain-specific enhancements
+
+domain:
+  name: "general"
+  keywords: []  # No specific keywords - applies to all queries
+  enhancement_instructions: ""  # No domain-specific instructions
+  terminology_guidelines: "Use clear, accessible language appropriate for general audiences"
+  source_requirements: "Prioritize authoritative and well-established sources"

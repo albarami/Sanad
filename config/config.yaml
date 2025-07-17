@@ -44,4 +44,38 @@ retrieval:
 # Performance Targets
 performance:
   max_latency_ms: 1000
-  target_retrieval_ms: 10 
+  target_retrieval_ms: 10
+
+# Domain Configuration (configurable for different contexts)
+domain:
+  name: "islamic_knowledge"  # Options: islamic_knowledge, healthcare, finance, labor_market, general
+  keywords:
+    - "islam"
+    - "islamic"
+    - "muslim"
+    - "quran"
+    - "hadith"
+    - "sunnah"
+    - "prophet"
+    - "allah"
+    - "muhammad"
+    - "prayer"
+    - "salah"
+    - "hajj"
+    - "zakat"
+    - "fasting"
+    - "ramadan"
+    - "mosque"
+    - "imam"
+    - "scholar"
+    - "fiqh"
+    - "sharia"
+    - "halal"
+    - "haram"
+  enhancement_instructions: |
+    6. For Islamic topics, prioritize authentic sources and scholarly consensus
+    7. Use appropriate Islamic terminology and transliterations
+    8. Acknowledge different schools of thought when relevant
+    9. Distinguish between established rulings and scholarly opinions
+  terminology_guidelines: "Use proper Arabic transliterations and Islamic scholarly terminology"
+  source_requirements: "Prioritize Quran, authentic Hadith, and recognized Islamic scholars"
