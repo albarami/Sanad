@@ -22,29 +22,16 @@ try:
     from ..agents.integrity import IntegrityAgent
     from ..agents.precision import PrecisionAgent
     from ..agents.provenance import ProvenanceAgent
-    from ..coordinator.orchestrator import (
-        CoordinatorInput,
-        SanadCoordinator,
-        VerificationResponse,
-    )
+    from ..coordinator.orchestrator import (CoordinatorInput, SanadCoordinator,
+                                            VerificationResponse)
     from ..core.baseline_llm import BaselineLLM, LLMResponse
     from ..core.config import get_config
     from ..db.database import get_db
-    from ..db.models import (
-        AuditLogCreate,
-        FeedbackCreate,
-        QueryLogResponse,
-        User,
-        UserCreate,
-        UserResponse,
-    )
-    from ..db.repository import (
-        AuditRepository,
-        ComplianceRepository,
-        FeedbackRepository,
-        QueryRepository,
-        UserRepository,
-    )
+    from ..db.models import (AuditLogCreate, FeedbackCreate, QueryLogResponse,
+                             User, UserCreate, UserResponse)
+    from ..db.repository import (AuditRepository, ComplianceRepository,
+                                 FeedbackRepository, QueryRepository,
+                                 UserRepository)
     from ..retrieval.simple_retriever import SimpleRetriever
     from ..trigger.detector import TriggerDetector
 except ImportError:
@@ -59,29 +46,16 @@ except ImportError:
     from agents.integrity import IntegrityAgent
     from agents.precision import PrecisionAgent
     from agents.provenance import ProvenanceAgent
-    from coordinator.orchestrator import (
-        CoordinatorInput,
-        SanadCoordinator,
-        VerificationResponse,
-    )
+    from coordinator.orchestrator import (CoordinatorInput, SanadCoordinator,
+                                          VerificationResponse)
     from core.baseline_llm import BaselineLLM, LLMResponse
     from core.config import get_config
     from db.database import get_db
-    from db.models import (
-        AuditLogCreate,
-        FeedbackCreate,
-        QueryLogResponse,
-        User,
-        UserCreate,
-        UserResponse,
-    )
-    from db.repository import (
-        AuditRepository,
-        ComplianceRepository,
-        FeedbackRepository,
-        QueryRepository,
-        UserRepository,
-    )
+    from db.models import (AuditLogCreate, FeedbackCreate, QueryLogResponse,
+                           User, UserCreate, UserResponse)
+    from db.repository import (AuditRepository, ComplianceRepository,
+                               FeedbackRepository, QueryRepository,
+                               UserRepository)
     from retrieval.simple_retriever import SimpleRetriever
     from trigger.detector import TriggerDetector
 

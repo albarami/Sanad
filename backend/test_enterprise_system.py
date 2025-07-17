@@ -20,14 +20,11 @@ sys.path.insert(0, str(backend_path.parent))
 
 # Import database components
 from backend.db.database import db_manager, init_database
-from backend.db.models import AuditLogCreate, FeedbackCreate, QueryLogCreate, UserCreate
-from backend.db.repository import (
-    AuditRepository,
-    ComplianceRepository,
-    FeedbackRepository,
-    QueryRepository,
-    UserRepository,
-)
+from backend.db.models import (AuditLogCreate, FeedbackCreate, QueryLogCreate,
+                               UserCreate)
+from backend.db.repository import (AuditRepository, ComplianceRepository,
+                                   FeedbackRepository, QueryRepository,
+                                   UserRepository)
 
 
 def test_database_initialization():
