@@ -13,6 +13,7 @@ try:
     from .base import AgentInput, AgentScore, BaseAgent
 except ImportError:
     from base import AgentInput, AgentScore, BaseAgent
+
     from core.config import get_config
 
 

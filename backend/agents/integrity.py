@@ -14,6 +14,7 @@ try:
     from .base import AgentInput, AgentScore, BaseAgent
 except ImportError:
     from base import AgentInput, AgentScore, BaseAgent
+
     from core.baseline_llm import BaselineLLM
     from core.config import get_config
 
