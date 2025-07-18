@@ -181,7 +181,7 @@ jobs:
         python scripts/run_benchmark.py
     
     - name: Upload benchmark results
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       if: always()
       with:
         name: benchmark-results
@@ -204,7 +204,7 @@ jobs:
         output: 'trivy-results.sarif'
     
     - name: Upload Trivy scan results
-      uses: github/codeql-action/upload-sarif@v2
+      uses: github/codeql-action/upload-sarif@v3
       if: always()
       with:
         sarif_file: 'trivy-results.sarif'
