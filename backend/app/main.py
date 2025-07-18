@@ -38,8 +38,8 @@ from .api_router import api_router
 
 # Import enhancer to register Prometheus metrics
 if PROMETHEUS_AVAILABLE:
-    from ..core import enhancer  # This registers the sanad_enhancement_* metrics
-    from ..core.config_hash import compute_config_hash
+    from core import enhancer  # This registers the sanad_enhancement_* metrics
+    from core.config_hash import compute_config_hash
 
 
 @asynccontextmanager
