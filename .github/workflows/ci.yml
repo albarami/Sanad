@@ -66,12 +66,10 @@ jobs:
     
     - name: Run unit tests
       run: |
-        cd backend
-        python -m pytest tests/ -v --cov=. --cov-report=xml --cov-report=term-missing
+        python -m pytest backend/tests/ -v --cov=backend --cov-report=xml --cov-report=term-missing
     
     - name: Check coverage threshold
       run: |
-        cd backend
         python -c "
         import xml.etree.ElementTree as ET
         tree = ET.parse('coverage.xml')
