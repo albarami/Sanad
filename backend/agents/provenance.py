@@ -12,7 +12,7 @@ try:
     from ..core.config import get_config
     from .base import AgentInput, AgentScore, BaseAgent
 except ImportError:
-    from base import AgentInput, AgentScore, BaseAgent
+    from agents.base import AgentInput, AgentScore, BaseAgent
 
     from core.config import get_config
 
