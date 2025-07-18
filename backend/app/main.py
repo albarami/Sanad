@@ -30,8 +30,8 @@ except ImportError:
     )
     PROMETHEUS_AVAILABLE = False
 
-from ..core.config import get_config
-from ..db.database import close_database, db_manager, init_database
+from core.config import get_config
+from db.database import close_database, db_manager, init_database
 
 # Import application components
 from .api_router import api_router
