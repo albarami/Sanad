@@ -9,6 +9,7 @@ import sys
 import time
 from pathlib import Path
 
+import pytest
 from loguru import logger
 
 # Add backend to path and fix import issues
@@ -37,6 +38,7 @@ except ImportError as e:
     agents_available = False
 
 
+@pytest.mark.asyncio
 async def test_baseline_llm():
     """Test the baseline LLM service."""
     print("\n=== Testing Baseline LLM ===")
@@ -123,6 +125,7 @@ def test_retriever():
         return False
 
 
+@pytest.mark.asyncio
 async def test_agents():
     """Test all verification agents."""
     print("\n=== Testing Verification Agents ===")
@@ -188,6 +191,7 @@ async def test_agents():
         return False
 
 
+@pytest.mark.asyncio
 async def test_coordinator():
     """Test the coordination service."""
     print("\n=== Testing Coordinator ===")
@@ -240,6 +244,7 @@ async def test_coordinator():
         return False
 
 
+@pytest.mark.asyncio
 async def test_full_system():
     """Test the complete end-to-end system."""
     print("\n=== Testing Complete System Integration ===")

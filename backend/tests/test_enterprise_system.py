@@ -10,6 +10,7 @@ import sys
 import time
 from pathlib import Path
 
+import pytest
 import requests
 from loguru import logger
 
@@ -326,6 +327,7 @@ def test_gdpr_compliance():
         return False
 
 
+@pytest.mark.asyncio
 async def test_api_endpoints():
     """Test FastAPI endpoints with enterprise features."""
     print("\n=== Testing API Endpoints ===")
