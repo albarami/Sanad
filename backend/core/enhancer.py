@@ -42,9 +42,9 @@ from typing import Any
 
 from pydantic import BaseModel, Field
 
-from ..agents.base import AgentScore, Passage
-from ..core.baseline_llm import BaselineLLM
-from ..core.config import Config, get_config
+from agents.base import AgentScore, Passage
+from core.baseline_llm import BaselineLLM
+from core.config import Config, get_config
 
 
 class EnhancementRequest(BaseModel):

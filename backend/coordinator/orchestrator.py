@@ -12,13 +12,13 @@ from pydantic import BaseModel, Field
 
 # Import base classes
 try:
-    from ..agents.base import AgentInput, AgentScore, BaseAgent, Passage
-    from ..core.baseline_llm import BaselineLLM, LLMResponse
-    from ..core.config import get_config
-    from ..core.enhancer import EnhancementRequest, ResponseEnhancer
-    from ..db.database import db_manager
-    from ..db.models import AuditLogCreate, QueryLogCreate
-    from ..db.repository import AuditRepository, QueryRepository
+    from agents.base import AgentInput, AgentScore, BaseAgent, Passage
+    from core.baseline_llm import BaselineLLM, LLMResponse
+    from core.config import get_config
+    from core.enhancer import EnhancementRequest, ResponseEnhancer
+    from db.database import db_manager
+    from db.models import AuditLogCreate, QueryLogCreate
+    from db.repository import AuditRepository, QueryRepository
 except ImportError:
     from agents.base import AgentInput, AgentScore, BaseAgent, Passage
     from core.baseline_llm import BaselineLLM, LLMResponse
