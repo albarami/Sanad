@@ -100,7 +100,7 @@ class BenchmarkRunner:
 
         try:
             response = requests.post(
-                f"{self.api_base_url}/verify", json={"query": question}, timeout=30
+                f"{self.api_base_url}/api/verify", json={"query": question}, timeout=30
             )
 
             response_time_ms = (time.time() - start_time) * 1000
